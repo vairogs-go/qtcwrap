@@ -314,11 +314,23 @@ The package provides intelligent error handling:
 
 ### Makefile Integration
 
+Create a simple build script `scripts/compile-templates.go`:
+```go
+package main
+
+import "github.com/vairogs-go/qtcwrap"
+
+func main() {
+    qtcwrap.CompileDirectory("templates")
+}
+```
+
+Then use it in your Makefile:
 ```makefile
 .PHONY: templates
 templates:
 	@echo "Compiling templates..."
-	@go run -mod=mod github.com/vairogs-go/qtcwrap/cmd/qtcwrap -dir=templates
+	@go run scripts/compile-templates.go
 
 .PHONY: build
 build: templates
@@ -328,19 +340,50 @@ build: templates
 
 ### Go Generate Integration
 
+If you have a qtcwrap.go file that calls qtcwrap functions, you can run it directly:
 ```go
-//go:generate go run github.com/vairogs-go/qtcwrap/cmd/qtcwrap -dir=templates
+//go:generate go run ../qtcwrap/qtcwrap.go
+package main
+```
+
+Or create a template compilation script (e.g., `scripts/gen-templates.go`):
+```go
+package main
+
+import "github.com/vairogs-go/qtcwrap"
+
+func main() {
+    qtcwrap.CompileDirectory("templates")
+}
+```
+
+Then use it with go:generate:
+```go
+//go:generate go run scripts/gen-templates.go
 package main
 ```
 
 ### CI/CD Integration
 
+Create a template compilation script in your repository and use it in CI/CD:
+
+`scripts/compile-templates.go`:
+```go
+package main
+
+import "github.com/vairogs-go/qtcwrap"
+
+func main() {
+    qtcwrap.CompileDirectory("templates")
+}
+```
+
+GitHub Actions example:
 ```yaml
-# GitHub Actions example
 - name: Compile Templates
   run: |
     go install github.com/valyala/quicktemplate/qtc@latest
-    go run github.com/vairogs-go/qtcwrap/cmd/qtcwrap -dir=templates
+    go run scripts/compile-templates.go
 ```
 
 ## Best Practices
@@ -383,7 +426,6 @@ BSD 3-Clause License - see [LICENSE](LICENSE) file for details.
 
 - **QuickTemplate**: The underlying template engine - https://github.com/valyala/quicktemplate
 - **qtc**: The QuickTemplate compiler - https://github.com/valyala/quicktemplate/tree/master/qtc
-- **Vairogs**: The parent project - https://github.com/vairogs-go/vairogs
 
 ## Changelog
 
